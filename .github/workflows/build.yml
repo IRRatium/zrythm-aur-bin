@@ -21,6 +21,13 @@ jobs:
           useradd -m builder
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
+
+      - name: Install zrythm dependencies
+        run: |
+          pacman -S --noconfirm gtk4 libadwaita pipewire-jack meson ninja python-sphinx libcyaml gobject-introspection
+
+          
+
       - name: Checkout zrythm-aur-bin
         uses: actions/checkout@v4
 
