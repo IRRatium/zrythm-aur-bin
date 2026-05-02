@@ -24,7 +24,7 @@ jobs:
 
       - name: Install zrythm dependencies
         run: |
-          pacman -S --noconfirm gtk4 libadwaita pipewire-jack meson ninja python-sphinx libcyaml gobject-introspection
+          pacman -S --noconfirm gtk4 libadwaita pipewire-jack meson ninja python-sphinx libcyaml gobject-introspection xdg-utils
 
           
 
