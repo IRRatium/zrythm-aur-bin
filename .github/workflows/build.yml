@@ -73,7 +73,6 @@ jobs:
         run: |
           sed "s/PKGVER/${{ steps.version.outputs.version }}/g" PKGBUILD.template > /home/builder/PKGBUILD
           chown -R builder:builder /home/builder
-
           
       - name: Check extracted dir
         run: |
