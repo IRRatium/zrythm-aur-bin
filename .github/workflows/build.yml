@@ -56,8 +56,8 @@ jobs:
       - name: Build zrythm with yay
         if: steps.check.outputs.exists == '0'
         run: |
-          pacman -Rdd jack2 --noconfirm || true
-          sudo -u builder yay -S --noconfirm --ask 4 --builddir /home/builder zrythm
+          pacman -Rdd jack2 carla-git-debug --noconfirm || true
+          sudo -u builder yay -S --noconfirm --ask 4 --overwrite '*' --builddir /home/builder zrythm
           find /home/builder -name "*.pkg.tar.zst" | head -5
 
       - name: Publish GitHub Release
@@ -66,7 +66,7 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Zrythm ${{ steps.version.outputs.version }}
-          files: /home/builder/**/*.pkg.tar.zst
+          files: /home/builder/zrythm/zrythm-${{ steps.version.outputs.version }}-*.pkg.tar.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -74,7 +74,7 @@ jobs:
         if: steps.check.outputs.exists == '0'
         id: sha
         run: |
-          PKG=$(find /home/builder -name "zrythm-*.pkg.tar.zst" | head -1)
+          PKG=$(find /home/builder -name "zrythm-[0-9]*.pkg.tar.zst" | head -1)
           SHA=$(sha256sum $PKG | cut -d' ' -f1)
           echo "sha=$SHA" >> $GITHUB_OUTPUT
 
