@@ -63,6 +63,15 @@ jobs:
           EXISTS=$(curl -s https://api.github.com/repos/IRRatium/zrythm-aur-bin/releases/tags/v${{ steps.version.outputs.version }} | grep -c '"tag_name"' || true)
           echo "exists=$EXISTS" >> $GITHUB_OUTPUT
 
+      - name: Build and install soxr manually
+        run: |
+          git clone https://git.code.sf.net/p/soxr/code soxr
+          cd soxr
+          cmake -B build -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DBUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build build
+          cmake --install build
+          
+      
       - name: Prepare PKGBUILD
         if: steps.check.outputs.exists == '0'
         run: |
