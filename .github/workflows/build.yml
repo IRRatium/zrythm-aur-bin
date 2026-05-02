@@ -44,6 +44,14 @@ jobs:
           sed "s/PKGVER/${{ steps.version.outputs.version }}/g" PKGBUILD.template > /home/builder/PKGBUILD
           chown -R builder:builder /home/builder
 
+          
+      - name: Check extracted dir
+        run: |
+          cd /home/builder
+          sudo -u builder makepkg --nobuild --noconfirm || true
+          ls /home/builder/src/
+
+
       - name: Build package
         if: steps.check.outputs.exists == '0'
         run: |
