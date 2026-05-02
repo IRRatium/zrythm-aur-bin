@@ -12,9 +12,7 @@ jobs:
 
     steps:
       - name: Setup Arch environment
-        run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git curl sudo
+        run: pacman -Syu --noconfirm base-devel git sudo
 
       - name: Cache pacman packages
         uses: actions/cache@v4
@@ -28,47 +26,10 @@ jobs:
           useradd -m builder
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-      - name: Install zrythm dependencies
-        run: |
-          pacman -S --noconfirm --ask=4 \
-            base-devel git cmake ninja meson sassc \
-            appstream boost breeze-icons chromaprint \
-            dconf fftw fluidsynth \
-            glib2-devel graphene graphviz \
-            gtk4 gtksourceview5 guile \
-            json-glib libadwaita libbacktrace libcyaml \
-            libepoxy libpanel lilv \
-            libxinerama libxrandr \
-            pcre portaudio \
-            qt5-base rtaudio rtmidi \
-            rubberband sdl2 serd sratom \
-            vamp-plugin-sdk xxhash yyjson \
-            alsa-lib libpulse libsndfile libsamplerate \
-            lv2 xdg-utils gobject-introspection \
-            python-sphinx flex libxml2 \
-            pipewire pipewire-jack
-    
-      - name: Install AUR packages
-        run: |
-          cd /tmp
-
-          git clone https://aur.archlinux.org/lsp-dsp-lib.git
-          cd lsp-dsp-lib
-          chown -R builder:builder .
-          sudo -u builder makepkg -si --noconfirm
-          cd /tmp
-
-      - name: Install Carla from source
-        run: |
-          git clone --depth=1 https://github.com/falkTX/Carla.git /tmp/carla
-          cd /tmp/carla
-          make -j$(nproc)
-          make install
-
-      - name: Checkout zrythm-aur-bin
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get latest version from upstream
+      - name: Get latest version
         id: version
         run: |
           VER=$(curl -s https://api.github.com/repos/zrythm/zrythm/releases/latest \
@@ -82,33 +43,20 @@ jobs:
           EXISTS=$(curl -s https://api.github.com/repos/IRRatium/zrythm-aur-bin/releases/tags/v${{ steps.version.outputs.version }} | grep -c '"tag_name"' || true)
           echo "exists=$EXISTS" >> $GITHUB_OUTPUT
 
-      - name: Build and install soxr manually
-        run: |
-          git clone https://git.code.sf.net/p/soxr/code soxr
-          cd soxr
-          cmake -B build -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DBUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/usr
-          cmake --build build
-          cmake --install build
-          
-      
-      - name: Prepare PKGBUILD
+      - name: Install yay
         if: steps.check.outputs.exists == '0'
         run: |
-          sed "s/PKGVER/${{ steps.version.outputs.version }}/g" PKGBUILD.template > /home/builder/PKGBUILD
-          chown -R builder:builder /home/builder
-          
-      - name: Check extracted dir
-        run: |
-          cd /home/builder
-          sudo -u builder makepkg --nobuild --noconfirm || true
-          ls /home/builder/src/
+          cd /tmp
+          git clone https://aur.archlinux.org/yay-bin.git
+          cd yay-bin
+          chown -R builder:builder .
+          sudo -u builder makepkg -si --noconfirm
 
-
-      - name: Build package
+      - name: Build zrythm with yay
         if: steps.check.outputs.exists == '0'
         run: |
-          cd /home/builder
-          sudo -u builder makepkg -s --noconfirm
+          sudo -u builder yay -S --noconfirm --builddir /home/builder zrythm
+          find /home/builder -name "*.pkg.tar.zst" | head -5
 
       - name: Publish GitHub Release
         if: steps.check.outputs.exists == '0'
@@ -116,7 +64,7 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Zrythm ${{ steps.version.outputs.version }}
-          files: /home/builder/*.pkg.tar.zst
+          files: /home/builder/**/*.pkg.tar.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -124,7 +72,8 @@ jobs:
         if: steps.check.outputs.exists == '0'
         id: sha
         run: |
-          SHA=$(sha256sum /home/builder/*.pkg.tar.zst | cut -d' ' -f1)
+          PKG=$(find /home/builder -name "zrythm-*.pkg.tar.zst" | head -1)
+          SHA=$(sha256sum $PKG | cut -d' ' -f1)
           echo "sha=$SHA" >> $GITHUB_OUTPUT
 
       - name: Update AUR
@@ -146,11 +95,8 @@ jobs:
 
           PKG_URL="https://github.com/IRRatium/zrythm-aur-bin/releases/download/v${{ steps.version.outputs.version }}/zrythm-${{ steps.version.outputs.version }}-x86_64.pkg.tar.zst"
 
-          sed \
-            "s/PKGVER/${{ steps.version.outputs.version }}/g; \
-             s|PKGURL|$PKG_URL|g; \
-             s/PKGSHA/${{ steps.sha.outputs.sha }}/g" \
-            PKGBUILD_BIN.template > aur-out/PKGBUILD
+          printf 'pkgname=zrythm-bin\npkgver=%s\npkgrel=1\npkgdesc="Zrythm DAW (prebuilt binary)"\narch=("x86_64")\nurl="https://github.com/IRRatium/zrythm-aur-bin"\nlicense=("AGPL3")\nprovides=("zrythm")\nconflicts=("zrythm")\ndepends=(gtk4 libadwaita pipewire-jack lilv lv2 libcyaml fftw)\nsource=("zrythm.pkg.tar.zst::%s")\nsha256sums=("%s")\n\npackage() {\n  bsdtar -xf "zrythm.pkg.tar.zst" -C "$pkgdir"\n  rm -rf "$pkgdir"/{.PKGINFO,.BUILDINFO,.MTREE}\n}\n' \
+            "${{ steps.version.outputs.version }}" "$PKG_URL" "${{ steps.sha.outputs.sha }}" > aur-out/PKGBUILD
 
           cd aur-out
           makepkg --printsrcinfo > .SRCINFO
