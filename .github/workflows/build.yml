@@ -43,14 +43,10 @@ jobs:
           EXISTS=$(curl -s https://api.github.com/repos/IRRatium/zrythm-aur-bin/releases/tags/v${{ steps.version.outputs.version }} | grep -c '"tag_name"' || true)
           echo "exists=$EXISTS" >> $GITHUB_OUTPUT
 
-      - name: Remove jack2 if present
-        if: steps.check.outputs.exists == '0'
-        run: pacman -Rdd jack2 --noconfirm || true
-
-        
       - name: Install yay
         if: steps.check.outputs.exists == '0'
         run: |
+          pacman -Rdd jack2 --noconfirm || true
           cd /tmp
           git clone https://aur.archlinux.org/yay-bin.git
           cd yay-bin
@@ -60,7 +56,8 @@ jobs:
       - name: Build zrythm with yay
         if: steps.check.outputs.exists == '0'
         run: |
-          sudo -u builder yay -S --noconfirm --builddir /home/builder zrythm
+          pacman -Rdd jack2 --noconfirm || true
+          sudo -u builder yay -S --noconfirm --ask 4 --builddir /home/builder zrythm
           find /home/builder -name "*.pkg.tar.zst" | head -5
 
       - name: Publish GitHub Release
