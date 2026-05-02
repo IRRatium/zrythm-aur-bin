@@ -51,14 +51,12 @@ jobs:
           sudo -u builder makepkg -si --noconfirm
           cd /tmp
 
-      - name: Install Carla from binary
+      - name: Install Carla from source
         run: |
-          curl -L https://github.com/falkTX/Carla/releases/download/v2.5.10/Carla_2.5.10-linux64.tar.xz -o carla.tar.xz
-          tar -xf carla.tar.xz
-          cp -r Carla_2.5.10-linux64/lib/* /usr/lib/ || true
-          cp -r Carla_2.5.10-linux64/share/* /usr/share/ || true
-          ls Carla_2.5.10-linux64/
-          printf 'prefix=/usr\nlibdir=/usr/lib\nName: carla-host-plugin\nDescription: Carla Plugin Host\nVersion: 2.5.10\nLibs: -L/usr/lib/carla\nCflags: -I/usr/include\n' > /usr/lib/pkgconfig/carla-host-plugin.pc
+          git clone --depth=1 https://github.com/falkTX/Carla.git /tmp/carla
+          cd /tmp/carla
+          make -j$(nproc)
+          make install
 
       - name: Checkout zrythm-aur-bin
         uses: actions/checkout@v4
