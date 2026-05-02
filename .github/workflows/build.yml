@@ -24,7 +24,27 @@ jobs:
 
       - name: Install zrythm dependencies
         run: |
-          pacman -S --noconfirm gtk4 libadwaita pipewire-jack meson ninja python-sphinx libcyaml gobject-introspection xdg-utils cmake soxr
+          pacman -S --noconfirm \
+            base-devel git cmake ninja meson sassc \
+            gtk4 libadwaita \
+            pipewire pipewire-jack \
+            libcyaml libsndfile libsamplerate \
+            alsa-lib libpulse \
+            lilv lv2 \
+            guile \
+            soxr \
+            rtmidi rtaudio \
+            zstd \
+            xdg-utils \
+            gobject-introspection \
+            python-sphinx \
+            flex \
+            libxml2 \
+            graphviz \
+            carla \
+            breeze-icons \
+            reproc \
+            boost
 
           
 
