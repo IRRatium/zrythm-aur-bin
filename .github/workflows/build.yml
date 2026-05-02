@@ -23,7 +23,7 @@ jobs:
 
       - name: Install zrythm dependencies
         run: |
-          pacman -S --noconfirm \
+          pacman -S --noconfirm --ask=4 \
             base-devel git cmake ninja meson sassc \
             appstream boost breeze-icons chromaprint \
             dconf fftw fluidsynth \
@@ -38,7 +38,8 @@ jobs:
             vamp-plugin-sdk xxhash yyjson \
             alsa-lib libpulse libsndfile libsamplerate \
             lv2 xdg-utils gobject-introspection \
-            python-sphinx flex libxml2 carla
+            python-sphinx flex libxml2 \
+            pipewire pipewire-jack
     
       - name: Install lsp-dsp-lib from AUR    # ← сюда
         run: |
