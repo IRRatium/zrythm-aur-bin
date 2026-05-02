@@ -32,7 +32,6 @@ jobs:
             alsa-lib libpulse \
             lilv lv2 \
             guile \
-            libsoxr \
             rtmidi rtaudio \
             zstd \
             xdg-utils \
