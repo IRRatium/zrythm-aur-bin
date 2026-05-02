@@ -41,11 +41,18 @@ jobs:
             python-sphinx flex libxml2 \
             pipewire pipewire-jack
     
-      - name: Install lsp-dsp-lib from AUR    # ← сюда
+      - name: Install AUR packages
         run: |
           cd /tmp
+
           git clone https://aur.archlinux.org/lsp-dsp-lib.git
           cd lsp-dsp-lib
+          chown -R builder:builder .
+          sudo -u builder makepkg -si --noconfirm
+          cd /tmp
+
+          git clone https://aur.archlinux.org/carla-git.git
+          cd carla-git
           chown -R builder:builder .
           sudo -u builder makepkg -si --noconfirm
           
