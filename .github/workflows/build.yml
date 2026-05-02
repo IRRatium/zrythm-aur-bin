@@ -43,6 +43,11 @@ jobs:
           EXISTS=$(curl -s https://api.github.com/repos/IRRatium/zrythm-aur-bin/releases/tags/v${{ steps.version.outputs.version }} | grep -c '"tag_name"' || true)
           echo "exists=$EXISTS" >> $GITHUB_OUTPUT
 
+      - name: Remove jack2 if present
+        if: steps.check.outputs.exists == '0'
+        run: pacman -Rdd jack2 --noconfirm || true
+
+        
       - name: Install yay
         if: steps.check.outputs.exists == '0'
         run: |
