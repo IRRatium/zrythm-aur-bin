@@ -6,9 +6,14 @@ arch=('x86_64')
 url="https://www.zrythm.org"
 license=('AGPL3')
 depends=(gtk4 libadwaita pipewire-jack)
-makedepends=(meson ninja python-sphinx libcyaml)
+makedepends=(meson ninja python-sphinx libcyaml cmake git)
 source=("https://github.com/zrythm/zrythm/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
+
+prepare() {
+  cd "$srcdir/zrythm-${pkgver}"
+  git clone https://github.com/drobilla/zix.git subprojects/zix || true
+}
 
 build() {
   cd "$srcdir/zrythm-${pkgver}"
