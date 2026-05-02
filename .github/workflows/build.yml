@@ -32,7 +32,7 @@ jobs:
             alsa-lib libpulse \
             lilv lv2 \
             guile \
-            soxr \
+            libsoxr \
             rtmidi rtaudio \
             zstd \
             xdg-utils \
@@ -43,7 +43,6 @@ jobs:
             graphviz \
             carla \
             breeze-icons \
-            reproc \
             boost
 
           
