@@ -21,29 +21,24 @@ jobs:
           useradd -m builder
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-
-      - name: Install zrythm dependenciesS
+      - name: Install zrythm dependencies
         run: |
           pacman -S --noconfirm \
             base-devel git cmake ninja meson sassc \
-            gtk4 libadwaita \
-            pipewire pipewire-jack \
-            libcyaml libsndfile libsamplerate \
-            alsa-lib libpulse \
-            lilv lv2 \
-            guile \
-            rtmidi rtaudio \
-            zstd \
-            xdg-utils \
-            gobject-introspection \
-            python-sphinx \
-            flex \
-            libxml2 \
-            graphviz \
-            carla \
-            breeze-icons \
-            libpanel \
-            boost
+            appstream boost breeze-icons chromaprint \
+            dconf fftw fluidsynth \
+            glib2-devel graphene graphviz \
+            gtk4 gtksourceview5 guile \
+            json-glib libadwaita libbacktrace libcyaml \
+            libepoxy libpanel lilv \
+            libxinerama libxrandr \
+            lsp-dsp-lib pcre portaudio \
+            qt5-base rtaudio rtmidi \
+            rubberband sdl2 serd sratom \
+            vamp-plugin-sdk xxhash yyjson \
+            alsa-lib libpulse libsndfile libsamplerate \
+            lv2 xdg-utils gobject-introspection \
+            python-sphinx flex libxml2 carla
 
           
 
