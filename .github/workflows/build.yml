@@ -42,6 +42,7 @@ jobs:
             graphviz \
             carla \
             breeze-icons \
+            libpanel \
             boost
 
           
