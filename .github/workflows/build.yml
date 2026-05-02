@@ -22,7 +22,7 @@ jobs:
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 
-      - name: Install zrythm dependencies
+      - name: Install zrythm dependenciesS
         run: |
           pacman -S --noconfirm \
             base-devel git cmake ninja meson sassc \
