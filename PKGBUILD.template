@@ -12,6 +12,7 @@ sha256sums=('SKIP')
 
 prepare() {
   cd "$srcdir/zrythm-${pkgver}"
+  rm -rf build
   git clone https://github.com/drobilla/zix.git subprojects/zix || true
 }
 
