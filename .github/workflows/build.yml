@@ -24,11 +24,11 @@ jobs:
       - name: Checkout zrythm-aur-bin
         uses: actions/checkout@v4
 
-      - name: Get latest version from your fork
+      - name: Get latest version from upstream
         id: version
         run: |
-          VER=$(curl -s https://api.github.com/repos/IRRatium/zrythm/tags \
-            | grep '"name"' | head -1 | cut -d'"' -f4 | sed 's/v//')
+          VER=$(curl -s https://api.github.com/repos/zrythm/zrythm/releases/latest \
+            | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
           echo "version=$VER" >> $GITHUB_OUTPUT
           echo "Building version: $VER"
 
