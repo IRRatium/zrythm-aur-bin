@@ -14,7 +14,6 @@ build() {
   cd "$srcdir/zrythm-${pkgver}"
   meson setup build \
     --prefix=/usr \
-    -Ddaw=true \
     -Dtests=false \
     -Dmanpage=false
   ninja -C build
