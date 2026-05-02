@@ -1,0 +1,101 @@
+name: Build & Publish to AUR
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+
+    steps:
+      - name: Setup Arch environment
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git curl sudo
+
+      - name: Create build user
+        run: |
+          useradd -m builder
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+      - name: Checkout zrythm-aur-bin
+        uses: actions/checkout@v4
+
+      - name: Get latest version from your fork
+        id: version
+        run: |
+          VER=$(curl -s https://api.github.com/repos/IRRatium/zrythm/tags \
+            | grep '"name"' | head -1 | cut -d'"' -f4 | sed 's/v//')
+          echo "version=$VER" >> $GITHUB_OUTPUT
+          echo "Building version: $VER"
+
+      - name: Check if already built
+        id: check
+        run: |
+          EXISTS=$(curl -s https://api.github.com/repos/IRRatium/zrythm-aur-bin/releases/tags/v${{ steps.version.outputs.version }} | grep -c '"tag_name"' || true)
+          echo "exists=$EXISTS" >> $GITHUB_OUTPUT
+
+      - name: Prepare PKGBUILD
+        if: steps.check.outputs.exists == '0'
+        run: |
+          sed "s/PKGVER/${{ steps.version.outputs.version }}/g" PKGBUILD.template > /home/builder/PKGBUILD
+          chown -R builder:builder /home/builder
+
+      - name: Build package
+        if: steps.check.outputs.exists == '0'
+        run: |
+          cd /home/builder
+          sudo -u builder makepkg -s --noconfirm
+
+      - name: Publish GitHub Release
+        if: steps.check.outputs.exists == '0'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Zrythm ${{ steps.version.outputs.version }}
+          files: /home/builder/*.pkg.tar.zst
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute sha256
+        if: steps.check.outputs.exists == '0'
+        id: sha
+        run: |
+          SHA=$(sha256sum /home/builder/*.pkg.tar.zst | cut -d' ' -f1)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+
+      - name: Update AUR
+        if: steps.check.outputs.exists == '0'
+        env:
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$AUR_SSH_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          cat >> ~/.ssh/config <<EOF
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur
+            User aur
+            StrictHostKeyChecking no
+          EOF
+
+          git clone ssh://aur@aur.archlinux.org/zrythm-bin.git aur-out
+
+          PKG_URL="https://github.com/IRRatium/zrythm-aur-bin/releases/download/v${{ steps.version.outputs.version }}/zrythm-${{ steps.version.outputs.version }}-x86_64.pkg.tar.zst"
+
+          sed \
+            "s/PKGVER/${{ steps.version.outputs.version }}/g; \
+             s|PKGURL|$PKG_URL|g; \
+             s/PKGSHA/${{ steps.sha.outputs.sha }}/g" \
+            PKGBUILD_BIN.template > aur-out/PKGBUILD
+
+          cd aur-out
+          makepkg --printsrcinfo > .SRCINFO
+          git config user.email "bot@users.noreply.github.com"
+          git config user.name "zrythm-bin-bot"
+          git add PKGBUILD .SRCINFO
+          git diff --cached --quiet || git commit -m "v${{ steps.version.outputs.version }}"
+          git push
