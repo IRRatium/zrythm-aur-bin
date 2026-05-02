@@ -20,7 +20,8 @@ build() {
   meson setup build \
     --prefix=/usr \
     -Dtests=false \
-    -Dmanpage=false
+    -Dmanpage=false \
+    -Dcarla=disabled
   ninja -C build
 }
 
