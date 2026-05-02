@@ -11,7 +11,7 @@ source=("https://github.com/IRRatium/zrythm-aur-bin")
 sha256sums=('SKIP')
 
 build() {
-  cd "zrythm-${pkgver}"
+  cd "$srcdir"/zrythm-${pkgver}
   meson setup build \
     --prefix=/usr \
     -Ddaw=true \
@@ -21,6 +21,6 @@ build() {
 }
 
 package() {
-  cd "zrythm-${pkgver}"
+  cd "$srcdir"/zrythm-${pkgver}
   DESTDIR="$pkgdir" ninja -C build install
 }
