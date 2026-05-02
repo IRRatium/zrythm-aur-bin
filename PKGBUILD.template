@@ -15,7 +15,9 @@ build() {
   meson setup build \
     --prefix=/usr \
     -Dtests=false \
-    -Dmanpage=false
+    -Dmanpage=false \
+    -Dcmake_prefix_path=/usr \
+    --cmake-prefix-path=/usr
   ninja -C build
 }
 
