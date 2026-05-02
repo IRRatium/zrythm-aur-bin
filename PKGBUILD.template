@@ -1,0 +1,26 @@
+pkgname=zrythm-bin
+pkgver=PKGVER
+pkgrel=1
+pkgdesc="Zrythm DAW"
+arch=('x86_64')
+url="https://www.zrythm.org"
+license=('AGPL3')
+depends=(gtk4 libadwaita pipewire-jack libadwaita)
+makedepends=(meson ninja python-sphinx libcyaml)
+source=("https://github.com/IRRatium/zrythm/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "zrythm-${pkgver}"
+  meson setup build \
+    --prefix=/usr \
+    -Ddaw=true \
+    -Dtests=false \
+    -Dmanpage=false
+  ninja -C build
+}
+
+package() {
+  cd "zrythm-${pkgver}"
+  DESTDIR="$pkgdir" ninja -C build install
+}
