@@ -7,11 +7,11 @@ url="https://www.zrythm.org"
 license=('AGPL3')
 depends=(gtk4 libadwaita pipewire-jack)
 makedepends=(meson ninja python-sphinx libcyaml)
-source=("https://github.com/IRRatium/zrythm-aur-bin")
+source=("https://github.com/zrythm/zrythm/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
 
 build() {
-  cd "$srcdir"/zrythm-${pkgver}
+  cd "$srcdir/zrythm-${pkgver}"
   meson setup build \
     --prefix=/usr \
     -Ddaw=true \
@@ -21,6 +21,6 @@ build() {
 }
 
 package() {
-  cd "$srcdir"/zrythm-${pkgver}
+  cd "$srcdir/zrythm-${pkgver}"
   DESTDIR="$pkgdir" ninja -C build install
 }
