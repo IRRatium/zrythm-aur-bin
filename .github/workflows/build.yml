@@ -51,11 +51,13 @@ jobs:
           sudo -u builder makepkg -si --noconfirm
           cd /tmp
 
-          git clone https://aur.archlinux.org/carla-git.git
-          cd carla-git
-          chown -R builder:builder .
-          sudo -u builder makepkg -si --noconfirm
-          
+      - name: Install Carla from binary
+        run: |
+          curl -L https://github.com/falkTX/Carla/releases/download/v2.5.9/Carla_2.5.9-linux64.tar.xz -o carla.tar.xz
+          tar -xf carla.tar.xz
+          cp -r Carla_2.5.9-linux64/lib/* /usr/lib/
+          cp -r Carla_2.5.9-linux64/share/* /usr/share/
+          printf 'prefix=/usr\nlibdir=${prefix}/lib\nName: carla-host-plugin\nDescription: Carla Plugin Host\nVersion: 2.5.9\nLibs: -L${libdir}/carla\n' > /usr/lib/pkgconfig/carla-host-plugin.pc
 
       - name: Checkout zrythm-aur-bin
         uses: actions/checkout@v4
