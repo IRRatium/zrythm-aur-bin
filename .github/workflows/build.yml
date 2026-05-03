@@ -120,8 +120,11 @@ jobs:
 
           SHA="${{ steps.sha.outputs.sha }}${{ steps.sha_existing.outputs.sha }}"
 
-          printf 'pkgname=zrythm-bin\npkgver=%s\npkgrel=1\npkgdesc="Zrythm DAW (prebuilt binary)"\narch=("x86_64")\nurl="https://github.com/IRRatium/zrythm-aur-bin"\nlicense=("AGPL3")\nprovides=("zrythm")\nconflicts=("zrythm")\ndepends=(gtk4 libadwaita pipewire-jack lilv lv2 libcyaml fftw)\nsource=("zrythm.pkg.tar.zst::%s")\nsha256sums=("%s")\n\npackage() {\n  bsdtar -xf "zrythm.pkg.tar.zst" -C "$pkgdir"\n  rm -rf "$pkgdir"/{.PKGINFO,.BUILDINFO,.MTREE}\n}\n' \
-            "${{ steps.version.outputs.version }}" "$PKG_URL" "$SHA" > aur-out/PKGBUILD
+          PKGVER=$(echo "${{ steps.version.outputs.version }}" | cut -d'-' -f1)
+          PKGREL=$(echo "${{ steps.version.outputs.version }}" | cut -d'-' -f2)
+
+          printf 'pkgname=zrythm-bin\npkgver=%s\npkgrel=%s\npkgdesc="Zrythm DAW (prebuilt binary)"\narch=("x86_64")\nurl="https://github.com/IRRatium/zrythm-aur-bin"\nlicense=("AGPL3")\nprovides=("zrythm")\nconflicts=("zrythm")\ndepends=(gtk4 libadwaita pipewire-jack lilv lv2 libcyaml fftw)\nsource=("zrythm.pkg.tar.zst::%s")\nsha256sums=("%s")\n\npackage() {\n  bsdtar -xf "zrythm.pkg.tar.zst" -C "$pkgdir"\n  rm -rf "$pkgdir"/{.PKGINFO,.BUILDINFO,.MTREE}\n}\n' \
+            "$PKGVER" "$PKGREL" "$PKG_URL" "$SHA" > aur-out/PKGBUILD
 
           chown -R builder:builder aur-out
 
