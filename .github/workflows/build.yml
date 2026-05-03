@@ -9,6 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: archlinux:latest
+    permissions:
+      contents: write
 
     steps:
       - name: Setup Arch environment
@@ -56,7 +58,8 @@ jobs:
       - name: Build zrythm with yay
         if: steps.check.outputs.exists == '0'
         run: |
-          pacman -Rdd jack2 carla-git-debug --noconfirm || true
+          pacman -Rdd jack2 --noconfirm || true
+          pacman -Rdd $(pacman -Qq | grep '\-debug$') --noconfirm || true
           sudo -u builder yay -S --noconfirm --ask 4 --overwrite '*' --builddir /home/builder zrythm
           find /home/builder -name "*.pkg.tar.zst" | head -5
 
