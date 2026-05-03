@@ -3,7 +3,7 @@ SPDX-FileCopyrightText: © 2018-2025 Alexandros Theodotou <alex@zrythm.org>
 SPDX-License-Identifier: FSFAP
 -->
 
-Zrythm
+Zrythm (AUR Binary version)
 ======
 
 > [!WARNING]
