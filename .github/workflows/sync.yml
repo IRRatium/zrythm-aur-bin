@@ -13,10 +13,20 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+
+      - name: Save own workflows
+        run: cp -r .github/workflows /tmp/my-workflows
+
       - name: Sync with upstream
         run: |
           git remote add upstream https://github.com/zrythm/zrythm.git
           git fetch upstream
           git checkout master
           git merge upstream/master --ff-only
+
+      - name: Restore own workflows
+        run: |
+          cp -r /tmp/my-workflows/* .github/workflows/
+          git add .github/workflows/
+          git diff --cached --quiet || git commit -m "chore: restore own workflows after upstream sync"
           git push origin master
