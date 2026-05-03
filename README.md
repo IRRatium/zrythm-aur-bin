@@ -3,146 +3,61 @@ SPDX-FileCopyrightText: © 2018-2025 Alexandros Theodotou <alex@zrythm.org>
 SPDX-License-Identifier: FSFAP
 -->
 
-Zrythm (AUR Binary version)
-======
+# Zrythm — AUR Binary Package
 
-> [!WARNING]
-> Zrythm is undergoing major refactoring in this branch.
-> Use the `v1` branch if you are looking for a usable version.
+Automatically built binary package of the **latest version** of [Zrythm](https://github.com/zrythm/zrythm) for Arch Linux and derivatives.
 
-[![translated](https://hosted.weblate.org/widgets/zrythm/-/svg-badge.svg "Translation Status")](https://hosted.weblate.org/engage/zrythm/?utm_source=widget)
+The package is updated daily and always matches the latest version available in AUR. No need to compile from source — just install the prebuilt binary.
 
-*a highly automated and intuitive digital audio workstation*
+## Installation
+
+### Via yay (recommended)
+
+```bash
+yay -S zrythm-bin
+```
+
+### Via paru
+
+```bash
+paru -S zrythm-bin
+```
+
+### Manually
+
+```bash
+git clone https://aur.archlinux.org/zrythm-bin.git
+cd zrythm-bin
+makepkg -si
+```
+
+## Updating
+
+```bash
+yay -Su zrythm-bin
+```
+
+## How it works
+
+This repository contains a GitHub Actions pipeline that:
+
+1. Checks the latest Zrythm version in AUR every day
+2. Builds the package in a clean Arch Linux environment
+3. Publishes the ready-to-install `.pkg.tar.zst` to [GitHub Releases](https://github.com/IRRatium/zrythm-aur-bin/releases)
+4. Updates the [AUR package zrythm-bin](https://aur.archlinux.org/packages/zrythm-bin)
+
+When installing via yay, the prebuilt binary is downloaded directly — no compilation required.
+
+## About Zrythm
+
+*A highly automated and intuitive digital audio workstation*
 
 ![screenshot](https://www.zrythm.org/static/images/screenshots/screenshot-20240208.png)
 
-Zrythm is a digital audio workstation tailored for both professionals and beginners, offering an intuitive interface and robust functionality.
+Zrythm is a DAW designed for both professionals and beginners, featuring support for LV2/CLAP/VST2/VST3/AU plugins, flexible automation and powerful mixing tools.
 
-Key features include:
-* Streamlined editing workflows
-* Flexible tools for creative expression
-* Limitless automation capabilities
-* Powerful mixing features
-* Chord assistance for musical composition
-* Support for various plugin and file formats
+Learn more at the [official website](https://www.zrythm.org).
 
-Zrythm is [free software](https://www.gnu.org/philosophy/free-sw.html) written
-in C++23 using Qt/QML and JUCE.
+## License
 
-## Features
-
-- Object looping, cloning, linking and stretching
-- Adaptive snapping
-- Multiple lanes per track
-- Bounce anything to audio or MIDI
-- Piano roll (MIDI editor) with chord integration, drum mode and a lollipop velocity editor
-- Audio editor with part editing (including in external app) and adjustable gain/fades
-- Event viewers (list editors) with editable object parameters
-- Per-context object functions
-- Audio/MIDI/automation recording with options to punch in/out, record on MIDI input and create takes
-- Device-bindable parameters for external control
-- Wide variety of track types for every purpose
-- Signal manipulation with signal groups, aux sends and direct anywhere-to-anywhere connections
-- In-context listening by dimming other tracks
-- Automate anything using automation events or CV signal from modulator plugins and macro knobs
-- Detachable views for multi-monitor setups
-- Searchable preferences
-- Support for LV2/CLAP/VST2/VST3/AU/LADSPA/DSSI plugins, SFZ/SF2 SoundFonts, Type 0 and 1 MIDI files, and almost every audio file format
-- Flexible built-in file and plugin browsers
-- Optional plugin sandboxing (bridging)
-- Stem export
-- Chord pad with built-in and user presets, including the ability to generate chords from scales
-- Automatic project backups
-- Undoable user actions with serializable undo history
-- Hardware-accelerated UI
-- SIMD-optimized DSP
-- Cross-platform, cross-audio/MIDI backend and cross-architecture
-- Available in multiple languages including Chinese, Japanese, Russian, Portuguese, French and German
-
-For a full list of features, see the
-[Features page](https://www.zrythm.org/en/features.html)
-on our website.
-
-## Building and Installation
-
-Prebuilt installers are available at <https://www.zrythm.org/en/download.html>.
-This is the recommended way to install Zrythm.
-
-See the following instructions if you would like to build Zrythm from source instead.
-
-### Building From Source
-
-> [!NOTE]
-> We make heavy use of CMake's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module to fetch dependencies so you don't need to install any dependencies manually other than CMake and Qt.
-> This guide assumes you are fine with fetching dependencies automatically.
-
-> [!IMPORTANT]
-> If you distribute your builds to others, you must comply with the license terms of Zrythm and all dependencies we use, in addition to our [Trademark Policy](TRADEMARKS.md).
-
-You can change `Release` to `Debug` below if you want to build in debug mode.
-
-#### GNU/Linux
-
-1. Install [CMake](https://cmake.org/), [Ninja](https://ninja-build.org/) and [Qt](https://www.qt.io/) (see [CMakeLists.txt](CMakeLists.txt) for required version).
-2. Open a terminal and go to the root of Zrythm's source code.
-3. Run `cmake -B builddir -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=<path to your Qt prefix>`.
-4. Run `cmake --build builddir --config Release`.
-5. Zrythm is now built at `builddir/src/gui/zrythm`.
-
-#### macOS
-
-1. Install Xcode, CMake and Qt.
-2. Open a terminal and go to the root of Zrythm's source code.
-3. Run `cmake -B builddir -G Xcode -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=<path to your Qt prefix>`.
-4. Open the Xcode project inside `builddir` and build it.
-
-#### Windows
-
-1. Install Visual Studio 2022 (CMake ships with Visual Studio, but you have to install the "Desktop development with C++" package), and Qt.
-2. Open Developer Powershell for Visual Studio 2022 and go to the root of Zrythm's source code.
-3. Run `cmake -B builddir -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=<path to your Qt prefix>`.
-4. Open the Visual Studio solution inside `builddir` and build it.
-
-> [!NOTE]
-> On Windows, you must build Qt with the same compiler and same configuration (Debug/Release) you use to build Zrythm.
-
-## Using Zryhm
-See the [user manual](http://manual.zrythm.org/).
-
-## Contributing
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Hacking
-See the [developer docs](https://docs.zrythm.org/).
-
-## Forum
-See [our forum](https://forum.zrythm.org).
-
-## Chat
-* [Zrythm server on Discord](https://discord.gg/ScHUMcNtPb)
-* [#zrythmdaw:matrix.org on Matrix](https://matrix.to/#/#zrythmdaw:matrix.org).
-* [#zrythm on Libera.Chat IRC](https://web.libera.chat/#zrythm).
-
-## Issue tracker
-See [Issues on GitLab](https://gitlab.zrythm.org/zrythm/zrythm/issues).
-
-## Releases
-<https://www.zrythm.org/releases>
-
-## Copying Zrythm
-[![agpl-3.0](https://www.gnu.org/graphics/agplv3-with-text-162x68.png)](https://www.gnu.org/licenses/agpl-3.0)
-
-See [COPYING](COPYING) for general copying conditions and
-[TRADEMARKS.md](TRADEMARKS.md) for our trademark policy.
-
-## Support
-If you would like to support this project please donate below or purchase a
-binary installer from
-<https://www.zrythm.org/en/download.html> - creating
-a DAW takes years of work and contributions enable
-us to spend more time working on the project.
-
-- [liberapay.com/Zrythm](https://liberapay.com/Zrythm/donate)
-- [paypal.me/zrythmdaw](https://paypal.me/zrythmdaw)
-- [opencollective.com/zrythm](https://opencollective.com/zrythm/donate)
-- Bitcoin (BTC): `bc1qjfyu2ruyfwv3r6u4hf2nvdh900djep2dlk746j`
+Zrythm is licensed under [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0).
