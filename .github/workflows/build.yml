@@ -34,8 +34,8 @@ jobs:
       - name: Get latest version
         id: version
         run: |
-          VER=$(curl -s https://api.github.com/repos/zrythm/zrythm/releases/latest \
-            | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
+          VER=$(curl -s "https://aur.archlinux.org/rpc/v5/info/zrythm" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['results'][0]['Version'])")
           echo "version=$VER" >> $GITHUB_OUTPUT
           echo "Building version: $VER"
 
