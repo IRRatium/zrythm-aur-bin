@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Setup Arch environment
-        run: pacman -Syu --noconfirm base-devel git sudo openssh
+        run: pacman -Syu --noconfirm base-devel git sudo openssh jq
 
       - name: Cache pacman packages
         uses: actions/cache@v4
@@ -34,7 +34,6 @@ jobs:
       - name: Get latest version
         id: version
         run: |
-          pacman -S --noconfirm jq
           VER=$(curl -s "https://aur.archlinux.org/rpc/v5/info/zrythm" \
             | jq -r '.results[0].Version')
           echo "version=$VER" >> $GITHUB_OUTPUT
@@ -70,7 +69,7 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Zrythm ${{ steps.version.outputs.version }}
-          files: /home/builder/zrythm/zrythm-${{ steps.version.outputs.version }}-*.pkg.tar.zst
+          files: /home/builder/zrythm/zrythm-${{ steps.version.outputs.version }}-x86_64.pkg.tar.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -90,12 +89,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "$AUR_SSH_KEY" > ~/.ssh/aur
           chmod 600 ~/.ssh/aur
-          cat >> ~/.ssh/config <<EOF
-          Host aur.archlinux.org
-            IdentityFile ~/.ssh/aur
-            User aur
-            StrictHostKeyChecking no
-          EOF
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
+          printf 'Host aur.archlinux.org\n  IdentityFile ~/.ssh/aur\n  User aur\n' > ~/.ssh/config
 
           git clone ssh://aur@aur.archlinux.org/zrythm-bin.git aur-out
 
