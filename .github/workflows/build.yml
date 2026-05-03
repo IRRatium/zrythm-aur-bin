@@ -45,6 +45,18 @@ jobs:
           EXISTS=$(curl -s https://api.github.com/repos/IRRatium/zrythm-aur-bin/releases/tags/v${{ steps.version.outputs.version }} | grep -c '"tag_name"' || true)
           echo "exists=$EXISTS" >> $GITHUB_OUTPUT
 
+      - name: Check if AUR is up to date
+        id: aur_check
+        run: |
+          AUR_VER=$(curl -s "https://aur.archlinux.org/rpc/v5/info/zrythm-bin" \
+            | jq -r '.results[0].Version // "none"')
+          echo "AUR version: $AUR_VER"
+          if [ "$AUR_VER" = "${{ steps.version.outputs.version }}-1" ] || [ "$AUR_VER" = "${{ steps.version.outputs.version }}" ]; then
+            echo "aur_outdated=0" >> $GITHUB_OUTPUT
+          else
+            echo "aur_outdated=1" >> $GITHUB_OUTPUT
+          fi
+
       - name: Install yay
         if: steps.check.outputs.exists == '0'
         run: |
@@ -81,8 +93,17 @@ jobs:
           SHA=$(sha256sum $PKG | cut -d' ' -f1)
           echo "sha=$SHA" >> $GITHUB_OUTPUT
 
+      - name: Compute sha256 from existing release
+        if: steps.check.outputs.exists == '1' && steps.aur_check.outputs.aur_outdated == '1'
+        id: sha_existing
+        run: |
+          PKG_URL="https://github.com/IRRatium/zrythm-aur-bin/releases/download/v${{ steps.version.outputs.version }}/zrythm-${{ steps.version.outputs.version }}-x86_64.pkg.tar.zst"
+          curl -L -o /tmp/zrythm.pkg.tar.zst "$PKG_URL"
+          SHA=$(sha256sum /tmp/zrythm.pkg.tar.zst | cut -d' ' -f1)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+
       - name: Update AUR
-        if: steps.check.outputs.exists == '0'
+        if: steps.aur_check.outputs.aur_outdated == '1'
         env:
           AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
         run: |
@@ -96,8 +117,10 @@ jobs:
 
           PKG_URL="https://github.com/IRRatium/zrythm-aur-bin/releases/download/v${{ steps.version.outputs.version }}/zrythm-${{ steps.version.outputs.version }}-x86_64.pkg.tar.zst"
 
+          SHA="${{ steps.sha.outputs.sha }}${{ steps.sha_existing.outputs.sha }}"
+
           printf 'pkgname=zrythm-bin\npkgver=%s\npkgrel=1\npkgdesc="Zrythm DAW (prebuilt binary)"\narch=("x86_64")\nurl="https://github.com/IRRatium/zrythm-aur-bin"\nlicense=("AGPL3")\nprovides=("zrythm")\nconflicts=("zrythm")\ndepends=(gtk4 libadwaita pipewire-jack lilv lv2 libcyaml fftw)\nsource=("zrythm.pkg.tar.zst::%s")\nsha256sums=("%s")\n\npackage() {\n  bsdtar -xf "zrythm.pkg.tar.zst" -C "$pkgdir"\n  rm -rf "$pkgdir"/{.PKGINFO,.BUILDINFO,.MTREE}\n}\n' \
-            "${{ steps.version.outputs.version }}" "$PKG_URL" "${{ steps.sha.outputs.sha }}" > aur-out/PKGBUILD
+            "${{ steps.version.outputs.version }}" "$PKG_URL" "$SHA" > aur-out/PKGBUILD
 
           cd aur-out
           makepkg --printsrcinfo > .SRCINFO
