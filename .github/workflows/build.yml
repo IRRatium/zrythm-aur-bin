@@ -127,6 +127,7 @@ jobs:
             "$PKGVER" "$PKGREL" "$PKG_URL" "$SHA" > aur-out/PKGBUILD
 
           chown -R builder:builder aur-out
+          git config --global --add safe.directory "$(pwd)/aur-out"
 
           cd aur-out
           sudo -u builder makepkg --printsrcinfo > .SRCINFO
